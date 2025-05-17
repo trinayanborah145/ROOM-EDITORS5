@@ -141,7 +141,7 @@ const Portfolio: React.FC = () => {
             <div className="relative max-w-4xl mx-auto">
               <div className="relative w-full max-w-4xl mx-auto bg-black">
                 <video
-                  src={selectedProject.video}
+                  src={selectedProject?.video}
                   controls
                   className="w-full max-h-[80vh] object-contain"
                   autoPlay
