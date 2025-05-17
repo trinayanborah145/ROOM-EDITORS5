@@ -10,6 +10,7 @@ import BlogSection from './components/BlogSection';
 import Contact from './components/Contact';
 import Footer from './components/Footer';
 import { ScrollToTop } from './components/ScrollToTop';
+import Chatbot from './components/Chatbot';
 
 function App() {
   return (
@@ -27,6 +28,7 @@ function App() {
       </main>
       <Footer />
       <ScrollToTop />
+      <Chatbot />
     </div>
   );
 }
