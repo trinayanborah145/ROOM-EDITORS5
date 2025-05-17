@@ -73,9 +73,12 @@ const Hero: React.FC = () => {
             <p className="text-lg md:text-xl text-white opacity-80 max-w-2xl mb-8 opacity-0 animate-fadeIn animation-delay-300">
               {slide.subtitle}
             </p>
-            <button className="bg-accent hover:bg-accent/90 text-white py-3 px-8 rounded-sm uppercase tracking-wider transition-all duration-300 text-sm font-medium opacity-0 animate-fadeIn animation-delay-600">
+            <a 
+              href="#portfolio"
+              className="bg-accent hover:bg-accent/90 text-white py-3 px-8 rounded-sm uppercase tracking-wider transition-all duration-300 text-sm font-medium opacity-0 animate-fadeIn animation-delay-600 inline-block"
+            >
               Explore Our Work
-            </button>
+            </a>
           </div>
         </div>
       ))}
