@@ -1,34 +1,41 @@
-import React from 'react';
+import React, { Suspense, lazy } from 'react';
 import Header from './components/Header';
-import Hero from './components/Hero';
-import Services from './components/Services';
-import Portfolio from './components/Portfolio';
-import BeforeAfter from './components/BeforeAfter';
-import About from './components/About';
-import Testimonials from './components/Testimonials';
-import BlogSection from './components/BlogSection';
-import Contact from './components/Contact';
 import Footer from './components/Footer';
 import { ScrollToTop } from './components/ScrollToTop';
-import Chatbot from './components/Chatbot';
+import LoadingSpinner from './components/LoadingSpinner';
+
+// Lazy load components
+const Hero = lazy(() => import('./components/Hero'));
+const Services = lazy(() => import('./components/Services'));
+const Portfolio = lazy(() => import('./components/Portfolio'));
+const BeforeAfter = lazy(() => import('./components/BeforeAfter'));
+const About = lazy(() => import('./components/About'));
+const Testimonials = lazy(() => import('./components/Testimonials'));
+const BlogSection = lazy(() => import('./components/BlogSection'));
+const Contact = lazy(() => import('./components/Contact'));
+const Chatbot = lazy(() => import('./components/Chatbot'));
 
 function App() {
   return (
     <div className="font-body bg-background text-primary">
       <Header />
       <main>
-        <Hero />
-        <Services />
-        <Portfolio />
-        <BeforeAfter />
-        <About />
-        <Testimonials />
-        <BlogSection />
-        <Contact />
+        <Suspense fallback={<LoadingSpinner />}>
+          <Hero />
+          <Services />
+          <Portfolio />
+          <BeforeAfter />
+          <About />
+          <Testimonials />
+          <BlogSection />
+          <Contact />
+        </Suspense>
       </main>
       <Footer />
       <ScrollToTop />
-      <Chatbot />
+      <Suspense fallback={null}>
+        <Chatbot />
+      </Suspense>
     </div>
   );
 }

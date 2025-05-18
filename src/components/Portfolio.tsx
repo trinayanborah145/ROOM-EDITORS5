@@ -1,5 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useInView } from './hooks/useInView';
+import OptimizedImage from './OptimizedImage';
+import LoadingSpinner from './LoadingSpinner';
 
 interface Project {
   id: number;
@@ -78,9 +80,45 @@ const projects: Project[] = [
 const Portfolio: React.FC = () => {
   const [filter, setFilter] = useState<string>("all");
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const [isVideoLoading, setIsVideoLoading] = useState(false);
+  const [videoLoaded, setVideoLoaded] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
   const { ref } = useInView({ threshold: 0.1 });
-
   const typedRef = ref as React.RefObject<HTMLDivElement>;
+  const videoPreloadCache = useRef<Record<string, boolean>>({});
+
+  // Lazy load videos when they come into view
+  useEffect(() => {
+    if (!selectedProject?.video) return;
+    
+    const preloadVideo = () => {
+      if (!selectedProject.video || videoPreloadCache.current[selectedProject.video]) return;
+      
+      const video = document.createElement('video');
+      video.preload = 'auto';
+      video.src = selectedProject.video;
+      video.load();
+      
+      video.oncanplay = () => {
+        videoPreloadCache.current[selectedProject.video!] = true;
+        setVideoLoaded(true);
+        setIsVideoLoading(false);
+      };
+      
+      video.onerror = () => {
+        console.error('Error loading video:', selectedProject.video);
+        setIsVideoLoading(false);
+      };
+    };
+    
+    setIsVideoLoading(true);
+    setVideoLoaded(false);
+    const timer = setTimeout(preloadVideo, 100);
+    
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [selectedProject]);
 
   const filteredProjects = filter === "all" 
     ? projects 
@@ -88,10 +126,23 @@ const Portfolio: React.FC = () => {
 
   const openVideo = (project: Project) => {
     setSelectedProject(project);
+    // Start preloading the video as soon as possible
+    if (project.video && !videoPreloadCache.current[project.video]) {
+      const video = document.createElement('video');
+      video.preload = 'auto';
+      video.src = project.video;
+      video.load();
+      videoPreloadCache.current[project.video] = true;
+    }
   };
 
   const closeVideo = () => {
+    if (videoRef.current) {
+      videoRef.current.pause();
+      videoRef.current.currentTime = 0;
+    }
     setSelectedProject(null);
+    setVideoLoaded(false);
   };
 
   return (
@@ -126,32 +177,82 @@ const Portfolio: React.FC = () => {
           className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-12"
         >
           {filteredProjects.map((project) => (
-            <div key={project.id} className="group relative overflow-hidden rounded-lg cursor-pointer" onClick={() => openVideo(project)}>
-              <img src={project.image} alt={project.title} className="w-full h-64 object-cover transition-transform duration-300 group-hover:scale-110" loading="lazy" />
-              <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-70 transition-all duration-300 flex items-center justify-center">
-                <h3 className="text-white text-xl font-semibold">{project.title}</h3>
-                <span className="text-accent capitalize text-sm">{project.category}</span>
+            <div 
+              key={project.id} 
+              className="group relative overflow-hidden rounded-lg cursor-pointer transform transition-transform duration-300 hover:scale-[1.02] hover:shadow-xl"
+              onClick={() => openVideo(project)}
+            >
+              <div className="relative aspect-video">
+                <OptimizedImage 
+                  src={project.image} 
+                  alt={project.title} 
+                  className="w-full h-full"
+                />
+                <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-70 transition-all duration-300 flex flex-col items-center justify-center p-4 text-center">
+                  <h3 className="text-white text-lg md:text-xl font-semibold mb-2">{project.title}</h3>
+                  <span className="text-accent text-sm px-3 py-1 bg-black bg-opacity-50 rounded-full">
+                    {project.category}
+                  </span>
+                  <div className="mt-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <div className="w-16 h-16 rounded-full bg-white bg-opacity-20 flex items-center justify-center">
+                      <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M6.3 2.841A1.5 1.5 0 004 4.11v11.78a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z" />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           ))}
         </div>
 
         {selectedProject && selectedProject.video && (
-          <div className="fixed inset-0 bg-black bg-opacity-90 z-50 flex items-center justify-center p-4">
-            <div className="relative max-w-4xl mx-auto">
-              <div className="relative w-full max-w-4xl mx-auto bg-black">
+          <div 
+            className="fixed inset-0 bg-black bg-opacity-90 z-50 flex items-center justify-center p-4"
+            onClick={closeVideo}
+          >
+            <div 
+              className="relative w-full max-w-6xl mx-auto bg-black rounded-lg overflow-hidden shadow-2xl"
+              onClick={e => e.stopPropagation()}
+            >
+              <div className="relative pt-[56.25%] w-full">
+                {isVideoLoading && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50">
+                    <LoadingSpinner />
+                  </div>
+                )}
                 <video
-                  src={selectedProject?.video}
+                  ref={videoRef}
+                  src={selectedProject.video}
                   controls
-                  className="w-full max-h-[80vh] object-contain"
+                  preload="auto"
+                  playsInline
+                  className={`absolute inset-0 w-full h-full object-contain ${!videoLoaded ? 'opacity-0' : 'opacity-100'} transition-opacity duration-300`}
+                  onCanPlay={() => {
+                    setVideoLoaded(true);
+                    setIsVideoLoading(false);
+                  }}
+                  onWaiting={() => setIsVideoLoading(true)}
+                  onPlaying={() => setIsVideoLoading(false)}
                   autoPlay
-                />
+                  muted
+                  loop
+                >
+                  Your browser does not support the video tag.
+                </video>
+              </div>
+              <div className="p-4 bg-black bg-opacity-70">
+                <h3 className="text-white text-xl font-semibold mb-2">{selectedProject.title}</h3>
+                <p className="text-gray-300 text-sm">{selectedProject.category}</p>
               </div>
               <button
                 onClick={closeVideo}
-                className="absolute top-4 right-4 text-white hover:text-accent"
+                className="absolute top-2 right-2 w-10 h-10 rounded-full bg-black bg-opacity-50 text-white hover:bg-opacity-75 transition-all duration-200 flex items-center justify-center"
+                aria-label="Close video"
               >
-                &times;
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
               </button>
             </div>
           </div>

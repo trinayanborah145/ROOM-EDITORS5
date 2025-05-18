@@ -1,3 +1,122 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Import performance optimizations */
+@import './styles/performance.css';
+
+/* Optimize font loading */
+@font-face {
+  font-family: 'Montserrat';
+  font-style: normal;
+  font-weight: 300 700;
+  font-display: swap;
+  src: url('/fonts/Montserrat-VariableFont_wght.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Playfair Display';
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url('/fonts/PlayfairDisplay-VariableFont_wght.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+/* Smooth scrolling for the whole document */
+html {
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Optimize body rendering */
+body {
+  @apply bg-background text-primary;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: 'kern' 1, 'liga' 1, 'calt' 1;
+  font-kerning: normal;
+  overflow-x: hidden;
+}
+
+/* Optimize images */
+img, video {
+  max-width: 100%;
+  height: auto;
+  vertical-align: middle;
+  content-visibility: auto;
+}
+
+/* Optimize transitions */
+.transition-all {
+  transition-property: all;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+
+/* Optimize focus states */
+*:focus {
+  outline: 2px solid theme('colors.primary');
+  outline-offset: 2px;
+}
+
+/* Optimize selection */
+::selection {
+  @apply bg-primary text-white;
+}
+
+/* Optimize buttons */
+button:focus {
+  @apply outline-none ring-2 ring-primary ring-opacity-50;
+}
+
+/* Optimize links */
+a {
+  @apply transition-colors duration-200;
+}
+
+a:hover {
+  @apply text-primary/80;
+}
+
+/* Optimize form elements */
+input, textarea, select {
+  @apply transition-all duration-200 border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-primary focus:border-transparent;
+}
+
+/* Optimize loading state */
+.js-loading *,
+.js-loading *:before,
+.js-loading *:after {
+  animation-play-state: paused !important;
+  transition: none !important;
+}
+
+/* Optimize print styles */
+@media print {
+  *,
+  *::before,
+  *::after {
+    background: transparent !important;
+    color: #000 !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+  
+  a,
+  a:visited {
+    text-decoration: underline;
+  }
+  
+  a[href]::after {
+    content: " (" attr(href) ")";
+  }
+  
+  img,
+  video,
+  iframe {
+    page-break-inside: avoid;
+  }
+}

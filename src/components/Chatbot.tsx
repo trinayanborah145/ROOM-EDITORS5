@@ -7,7 +7,7 @@ const Chatbot = () => {
     // Create and append the script tag
     const script = document.createElement('script');
     script.src = 'https://interfaces.zapier.com/assets/web-components/zapier-interfaces/zapier-interfaces.esm.js';
-    script.async = true;
+    script.async = true; 
     script.type = 'module';
     document.body.appendChild(script);
 
