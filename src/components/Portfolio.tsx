@@ -247,10 +247,10 @@ const Portfolio: React.FC = () => {
               </div>
               <button
                 onClick={closeVideo}
-                className="absolute top-2 right-2 w-10 h-10 rounded-full bg-black bg-opacity-50 text-white hover:bg-opacity-75 transition-all duration-200 flex items-center justify-center"
+                className="absolute top-4 right-4 w-12 h-12 rounded-full bg-black bg-opacity-70 text-white hover:bg-opacity-100 transition-all duration-200 flex items-center justify-center"
                 aria-label="Close video"
               >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
