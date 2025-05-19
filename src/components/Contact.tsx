@@ -116,7 +116,14 @@ const Contact: React.FC = () => {
                 </div>
                 <div>
                   <h4 className="font-medium mb-1">Our Location</h4>
-                  <p className="text-white/80"> CCMP+CG7, Joy Mangla, Assam 781334</p>
+                  <a 
+                    href="https://www.google.com/maps/search/?api=1&query=CCMP%2BCG7%2C+Joy+Mangla%2C+Assam+781334" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-white/80 hover:text-accent transition-colors duration-300"
+                  >
+                    CCMP+CG7, Joy Mangla, Assam 781334
+                  </a>
                 </div>
               </div>
               
@@ -126,7 +133,12 @@ const Contact: React.FC = () => {
                 </div>
                 <div>
                   <h4 className="font-medium mb-1">Phone Number</h4>
-                  <p className="text-white/80">+9169015 98958</p>
+                  <a 
+                    href="tel:+916901598958" 
+                    className="text-white/80 hover:text-accent transition-colors duration-300"
+                  >
+                    +91 69015 98958
+                  </a>
                 </div>
               </div>
               
@@ -136,7 +148,12 @@ const Contact: React.FC = () => {
                 </div>
                 <div>
                   <h4 className="font-medium mb-1">Email Address</h4>
-                  <p className="text-white/80">roomeditors1@gmail.com</p>
+                  <a 
+                    href="mailto:roomeditors1@gmail.com" 
+                    className="text-white/80 hover:text-accent transition-colors duration-300"
+                  >
+                    roomeditors1@gmail.com
+                  </a>
                 </div>
               </div>
               
