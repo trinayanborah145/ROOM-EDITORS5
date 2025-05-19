@@ -37,27 +37,23 @@ export default defineConfig(({ mode }) => ({
     outDir: 'dist',
     emptyOutDir: true,
     rollupOptions: {
-      external: [
-        'react',
-        'react-dom',
-        'react-router-dom',
-        'react-dropzone',
-        'react-icons/fi',
-        'react-icons',
-        'axios',
-        '@tanstack/react-query',
-      ],
       output: {
-        manualChunks: {
-          vendor: [
-            'react',
-            'react-dom',
-            'react-router-dom',
-            'react-dropzone',
-            'axios'
-          ],
-          reactIcons: ['react-icons/fi', 'react-icons'],
-          reactQuery: ['@tanstack/react-query']
+        manualChunks: (id) => {
+          if (id.includes('node_modules')) {
+            if (id.includes('@tanstack')) {
+              return 'vendor.react-query';
+            }
+            if (id.includes('react-icons')) {
+              return 'vendor.icons';
+            }
+            if (id.includes('react-dom')) {
+              return 'vendor.react-dom';
+            }
+            if (id.includes('react')) {
+              return 'vendor.react';
+            }
+            return 'vendor';
+          }
         }
       },
     },
