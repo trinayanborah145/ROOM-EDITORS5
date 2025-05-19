@@ -1,7 +1,8 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { useInView } from './hooks/useInView';
 import OptimizedImage from './OptimizedImage';
-import LoadingSpinner from './LoadingSpinner';
+import OptimizedVideo from './OptimizedVideo';
+
 
 interface Project {
   id: number;
@@ -77,56 +78,88 @@ const projects: Project[] = [
   }
 ];
 
+// Cache for video poster images
+const videoPosters: Record<string, string> = {};
+
+// Function to get a poster image for a video
+const getVideoPoster = (videoUrl: string): Promise<string> => {
+  return new Promise((resolve) => {
+    if (videoPosters[videoUrl]) {
+      resolve(videoPosters[videoUrl]);
+      return;
+    }
+
+    const video = document.createElement('video');
+    video.src = videoUrl;
+    video.crossOrigin = 'anonymous';
+    video.preload = 'metadata';
+    
+    video.onloadedmetadata = () => {
+      // Seek to a frame to capture as poster
+      video.currentTime = Math.min(1, video.duration * 0.1); // Try to get a frame at 10% of the video
+    };
+
+    video.onseeked = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        const posterUrl = canvas.toDataURL('image/jpeg', 0.8);
+        videoPosters[videoUrl] = posterUrl;
+        resolve(posterUrl);
+      } else {
+        resolve('');
+      }
+    };
+
+    video.onerror = () => {
+      resolve('');
+    };
+  });
+};
+
 const Portfolio: React.FC = () => {
   const [filter, setFilter] = useState<string>("all");
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [isVideoLoading, setIsVideoLoading] = useState(false);
-  const [videoLoaded, setVideoLoaded] = useState(false);
+  const [videoPoster, setVideoPoster] = useState<string>('');
   const videoRef = useRef<HTMLVideoElement>(null);
   const { ref } = useInView({ threshold: 0.1 });
   const typedRef = ref as React.RefObject<HTMLDivElement>;
   const videoPreloadCache = useRef<Record<string, boolean>>({});
+  const [filteredProjects, setFilteredProjects] = useState<Project[]>([]);
 
-  // Lazy load videos when they come into view
+  // Filter projects based on the selected filter
+  useEffect(() => {
+    const filtered = filter === "all" 
+      ? [...projects] 
+      : projects.filter((project: Project) => project.category === filter);
+    setFilteredProjects(filtered);
+  }, [filter]);
+
+  // Handle video poster generation when a project is selected
   useEffect(() => {
     if (!selectedProject?.video) return;
-    
-    const preloadVideo = () => {
-      if (!selectedProject.video || videoPreloadCache.current[selectedProject.video]) return;
-      
-      const video = document.createElement('video');
-      video.preload = 'auto';
-      video.src = selectedProject.video;
-      video.load();
-      
-      video.oncanplay = () => {
-        videoPreloadCache.current[selectedProject.video!] = true;
-        setVideoLoaded(true);
-        setIsVideoLoading(false);
-      };
-      
-      video.onerror = () => {
-        console.error('Error loading video:', selectedProject.video);
-        setIsVideoLoading(false);
-      };
+
+    const generatePoster = async () => {
+      try {
+        const poster = await getVideoPoster(selectedProject.video!);
+        setVideoPoster(poster);
+      } catch (error) {
+        console.error('Error generating video poster:', error);
+      }
     };
-    
-    setIsVideoLoading(true);
-    setVideoLoaded(false);
-    const timer = setTimeout(preloadVideo, 100);
-    
-    return () => {
-      clearTimeout(timer);
-    };
+
+    generatePoster();
   }, [selectedProject]);
 
-  const filteredProjects = filter === "all" 
-    ? projects 
-    : projects.filter((project: Project) => project.category === filter);
-
-  const openVideo = (project: Project) => {
+  const openVideo = useCallback((project: Project) => {
     setSelectedProject(project);
-    // Start preloading the video as soon as possible
+    setIsVideoLoading(true);
+    
+    // Start preloading the video in the background
     if (project.video && !videoPreloadCache.current[project.video]) {
       const video = document.createElement('video');
       video.preload = 'auto';
@@ -134,16 +167,16 @@ const Portfolio: React.FC = () => {
       video.load();
       videoPreloadCache.current[project.video] = true;
     }
-  };
+  }, []);
 
-  const closeVideo = () => {
+  const closeVideo = useCallback(() => {
     if (videoRef.current) {
       videoRef.current.pause();
       videoRef.current.currentTime = 0;
     }
     setSelectedProject(null);
-    setVideoLoaded(false);
-  };
+    setVideoPoster('');
+  }, []);
 
   return (
     <section id="portfolio" className="py-20 bg-white">
@@ -216,30 +249,24 @@ const Portfolio: React.FC = () => {
               onClick={e => e.stopPropagation()}
             >
               <div className="relative pt-[56.25%] w-full">
+                <div className="absolute inset-0 w-full h-full">
+                  <OptimizedVideo
+                    src={selectedProject.video}
+                    placeholderSrc={videoPoster}
+                    className="w-full h-full object-contain"
+                    autoPlay
+                    controls
+                    loop
+                    onVideoClick={closeVideo}
+                    onCanPlay={() => setIsVideoLoading(false)}
+                    onWaiting={() => setIsVideoLoading(true)}
+                  />
+                </div>
                 {isVideoLoading && (
-                  <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50">
-                    <LoadingSpinner />
+                  <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-70">
+                    <div className="w-16 h-16 border-t-2 border-primary border-solid rounded-full animate-spin"></div>
                   </div>
                 )}
-                <video
-                  ref={videoRef}
-                  src={selectedProject.video}
-                  controls
-                  preload="auto"
-                  playsInline
-                  className={`absolute inset-0 w-full h-full object-contain ${!videoLoaded ? 'opacity-0' : 'opacity-100'} transition-opacity duration-300`}
-                  onCanPlay={() => {
-                    setVideoLoaded(true);
-                    setIsVideoLoading(false);
-                  }}
-                  onWaiting={() => setIsVideoLoading(true)}
-                  onPlaying={() => setIsVideoLoading(false)}
-                  autoPlay
-                  muted
-                  loop
-                >
-                  Your browser does not support the video tag.
-                </video>
               </div>
               <div className="p-4 bg-black bg-opacity-70">
                 <h3 className="text-white text-xl font-semibold mb-2">{selectedProject.title}</h3>
@@ -247,7 +274,7 @@ const Portfolio: React.FC = () => {
               </div>
               <button
                 onClick={closeVideo}
-                className="absolute top-6 right-6 w-16 h-16 rounded-full bg-black bg-opacity-80 text-white hover:bg-opacity-100 transition-all duration-200 flex items-center justify-center shadow-lg hover:scale-110 transform transition-transform"
+                className="absolute top-6 right-6 w-16 h-16 rounded-full bg-black bg-opacity-80 text-white hover:bg-opacity-100 transition-all duration-200 flex items-center justify-center shadow-lg hover:scale-110 transform"
                 aria-label="Close video"
               >
                 <svg className="w-10 h-10" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
