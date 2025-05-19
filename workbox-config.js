@@ -1,8 +1,4 @@
-// @ts-check
-'use strict';
-
-/** @type {import('workbox-build').GenerateSWOptions} */
-const config = {
+module.exports = {
   globDirectory: 'dist/',
   globPatterns: [
     '**/*.{html,js,css,png,jpg,jpeg,svg,gif,ico,webp,woff,woff2,ttf,eot,json}'
@@ -17,13 +13,10 @@ const config = {
   dontCacheBustURLsMatching: /\.\w{8}\./,
   runtimeCaching: [
     {
-      urlPattern: ({url}) => {
-        return url.origin === 'https://fonts.googleapis.com' ||
-               url.origin === 'https://fonts.gstatic.com';
-      },
+      urlPattern: /^https:\/\/fonts\.googleapis\.com/,
       handler: 'StaleWhileRevalidate',
       options: {
-        cacheName: 'google-fonts',
+        cacheName: 'google-fonts-stylesheets',
         expiration: {
           maxEntries: 10,
           maxAgeSeconds: 60 * 60 * 24 * 365 // 1 year
@@ -31,7 +24,18 @@ const config = {
       }
     },
     {
-      urlPattern: /\/\.(?:png|jpg|jpeg|svg|gif|webp)$/,
+      urlPattern: /^https:\/\/fonts\.gstatic\.com/,
+      handler: 'CacheFirst',
+      options: {
+        cacheName: 'google-fonts-webfonts',
+        expiration: {
+          maxEntries: 10,
+          maxAgeSeconds: 60 * 60 * 24 * 365 // 1 year
+        }
+      }
+    },
+    {
+      urlPattern: /\.(?:png|jpg|jpeg|svg|gif|webp)$/,
       handler: 'CacheFirst',
       options: {
         cacheName: 'images',
@@ -55,6 +59,3 @@ const config = {
     }
   ]
 };
-
-// Export the configuration for Workbox
-module.exports = config;

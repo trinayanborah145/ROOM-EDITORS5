@@ -9,15 +9,14 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "vite build && node scripts/generate-sitemap.js && npm run optimize-assets && npm run generate-precache",
-    "postbuild": "workbox generateSW workbox-config.js",
+    "build": "vite build && npm run postbuild",
+    "postbuild": "node scripts/generate-sitemap.js && npm run optimize-assets && workbox generateSW workbox-config.js",
     "build:analyze": "ANALYZE=true vite build",
     "preview": "vite preview --port 4173",
     "lint": "eslint . --ext .ts,.tsx",
     "lint:fix": "eslint . --ext .ts,.tsx --fix",
     "optimize-assets": "imagemin public/**/*.{jpg,png,svg} --out-dir=public/optimized",
-    "generate-sitemap": "node scripts/generate-sitemap.js",
-    "generate-precache": "workbox generateSW workbox-config.js"
+    "generate-sitemap": "node scripts/generate-sitemap.js"
   },
   "dependencies": {
     "@headlessui/react": "^2.2.3",
