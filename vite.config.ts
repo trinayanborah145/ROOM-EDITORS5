@@ -2,26 +2,43 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { visualizer } from 'rollup-plugin-visualizer';
 import { ViteImageOptimizer } from 'vite-plugin-image-optimizer';
+import viteCompression from 'vite-plugin-compression';
+import legacy from '@vitejs/plugin-legacy';
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
   base: './', // This ensures assets are loaded correctly in production
   plugins: [
+    // Core plugins
     react(),
+    
+    // Image optimization
     ViteImageOptimizer({
-      png: {
-        quality: 80,
-      },
-      jpeg: {
-        quality: 80,
-      },
-      jpg: {
-        quality: 80,
-      },
-      webp: {
-        lossless: true,
-      },
+      png: { quality: 80 },
+      jpeg: { quality: 80 },
+      jpg: { quality: 80 },
+      webp: { lossless: true },
     }),
+    
+    // Gzip/Brotli compression
+    viteCompression({
+      algorithm: 'brotliCompress',
+      ext: '.br',
+      threshold: 1024, // Only compress files > 1KB
+    }),
+    viteCompression({
+      algorithm: 'gzip',
+      ext: '.gz',
+      threshold: 1024, // Only compress files > 1KB
+    }),
+    
+    // Legacy browser support
+    legacy({
+      targets: ['defaults', 'not IE 11'],
+      modernPolyfills: true,
+    }),
+    
+    // Bundle analyzer
     mode === 'analyze' && visualizer({
       open: true,
       filename: 'dist/stats.html',
@@ -36,6 +53,12 @@ export default defineConfig(({ mode }) => ({
   build: {
     outDir: 'dist',
     emptyOutDir: true,
+    sourcemap: false, // Disable source maps in production
+    reportCompressedSize: false, // Disable gzip size reporting for faster builds
+    target: 'esnext', // Target modern browsers
+    modulePreload: {
+      polyfill: false, // Disable module preload polyfill as we're targeting modern browsers
+    },
     rollupOptions: {
       output: {
         manualChunks: (id) => {

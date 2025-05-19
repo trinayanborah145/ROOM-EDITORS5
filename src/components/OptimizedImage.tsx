@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useLazyImage } from '../hooks/useLazyImage';
 
 interface OptimizedImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
@@ -15,8 +15,17 @@ const OptimizedImage: React.FC<OptimizedImageProps> = ({
   className = '',
   ...props
 }) => {
-  const { imageSrc, isLoading, imgRef } = useLazyImage(src);
+  // Ensure the image path is absolute by adding a leading slash if it doesn't have one
+  const normalizedSrc = src.startsWith('/') ? src : `/${src}`;
+  const { imageSrc, isLoading, imgRef } = useLazyImage(normalizedSrc);
   
+  // Log image loading state for debugging
+  useEffect(() => {
+    if (imageSrc) {
+      console.log('Image loaded:', imageSrc);
+    }
+  }, [imageSrc]);
+
   return (
     <div className={`relative overflow-hidden ${className}`}>
       <img
@@ -26,6 +35,10 @@ const OptimizedImage: React.FC<OptimizedImageProps> = ({
         className={`w-full h-full object-cover transition-opacity duration-300 ${
           isLoading ? 'opacity-0' : 'opacity-100'
         }`}
+        onError={(e) => {
+          console.error('Error loading image:', normalizedSrc);
+          if (props.onError) props.onError(e as any);
+        }}
         loading="lazy"
         {...props}
       />

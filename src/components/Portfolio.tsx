@@ -1,8 +1,46 @@
-import React, { useState, useRef, useCallback, useEffect } from 'react';
-import { useInView } from './hooks/useInView';
-import OptimizedImage from './OptimizedImage';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import OptimizedVideo from './OptimizedVideo';
 
+// Sample project data
+const projects = [
+  {
+    id: 1,
+    title: "Minimalist Apartment in Guwahati",
+    category: "residential",
+    image: "/images/Himat_WeightRoom.webp",
+    video: "/videos/amar notun ghor.mp4"
+  },
+  {
+    id: 2,
+    title: "Modern Office Space",
+    category: "commercial",
+    image: "/images/office1.jpg"
+  },
+  {
+    id: 3,
+    title: "Luxury Villa",
+    category: "residential",
+    image: "/images/villa1.jpg"
+  },
+  {
+    id: 4,
+    title: "Retail Store Design",
+    category: "commercial",
+    image: "/images/retail1.jpg"
+  },
+  {
+    id: 5,
+    title: "Beach House",
+    category: "residential",
+    image: "/images/beach1.jpg"
+  },
+  {
+    id: 6,
+    title: "Restaurant Interior",
+    category: "commercial",
+    image: "/images/restaurant1.jpg"
+  },
+];
 
 interface Project {
   id: number;
@@ -12,319 +50,175 @@ interface Project {
   video?: string;
 }
 
-const projects: Project[] = [
-  {
-    id: 1,
-    title: "Minimalist Apartment in Guwahati",
-    category: "residential",
-    image: "/01-channel-flagship-interior-store-bangalore-1-720x395.jpg",
-    video: "/videos/amar notun ghor.mp4"
-  },
-  {
-    id: 2,
-    title: "Full Interior House Design in Goalpara",
-    category: "residential",
-    image: "/01-channel-flagship-interior-store-bangalore-1-720x395.jpg",
-    video: "/videos/RESIDENTIAL.mp4"
-  },
-  {
-    id: 3,
-    title: "Mobile Store Design in Pathsala",
-    category: "commercial",
-    image: "/01-channel-flagship-interior-store-bangalore-1-720x395.jpg",
-    video: "/videos/pathshala.mp4"
-  },
-  {
-    id: 4,
-    title: "Corporate Office Space in Dibrugarh",
-    category: "commercial",
-    image: "/01-channel-flagship-interior-store-bangalore-1-720x395.jpg",
-    video: "/videos/notunbb.mp4"
-  },
-  {
-    id: 5,
-    title: "Full Modular Kitchen in Golaghat",
-    category: "residential2",
-    image: "/01-channel-flagship-interior-store-bangalore-1-720x395.jpg",
-    video: "/videos/Modular Kitchen.mp4"
-  },
-  {
-    id: 6,
-    title: "School Cabin Design in Goalpara",
-    category: "commercial",
-    image: "/01-channel-flagship-interior-store-bangalore-1-720x395.jpg",
-    video: "/videos/KINGKOR.mp4"
-  },
-  {
-    id: 7,
-    title: "Luxury GYM Design in Guwahati",
-    category: "commercial",
-    image: "/01-channel-flagship-interior-store-bangalore-1-720x395.jpg",
-    video: "/videos/GYM.mp4"
-  },
-  {
-    id: 8,
-    title: "Super Mart Design in Bongaigaon",
-    category: "commercial",
-    image: "/01-channel-flagship-interior-store-bangalore-1-720x395.jpg",
-    video: "/videos/bongaigaon.mp4"
-  },
-  {
-    id: 9,
-    title: "Flat Interior Design in Six-Mile",
-    category: "residential",
-    image: "/01-channel-flagship-interior-store-bangalore-1-720x395.jpg",
-    video: "/videos/dbre.mp4"
-  }
-];
+const Portfolio: React.FC = () => {
+  const [filter, setFilter] = useState<string>('all');
+  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const modalRef = useRef<HTMLDivElement>(null);
+  const [isClient, setIsClient] = useState(false);
 
-// Cache for video poster images
-const videoPosters: Record<string, string> = {};
+  // Check if we're on the client side
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
-// Function to get a poster image for a video
-const getVideoPoster = (videoUrl: string): Promise<string> => {
-  return new Promise((resolve) => {
-    if (videoPosters[videoUrl]) {
-      resolve(videoPosters[videoUrl]);
-      return;
-    }
-
-    const video = document.createElement('video');
-    video.src = videoUrl;
-    video.crossOrigin = 'anonymous';
-    video.preload = 'metadata';
+  // Handle project click to open modal
+  const handleProjectClick = useCallback((project: Project) => {
+    if (!project.video) return;
     
-    video.onloadedmetadata = () => {
-      // Seek to a frame to capture as poster
-      video.currentTime = Math.min(1, video.duration * 0.1); // Try to get a frame at 10% of the video
-    };
-
-    video.onseeked = () => {
-      const canvas = document.createElement('canvas');
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
-      const ctx = canvas.getContext('2d');
-      if (ctx) {
-        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-        const posterUrl = canvas.toDataURL('image/jpeg', 0.8);
-        videoPosters[videoUrl] = posterUrl;
-        resolve(posterUrl);
-      } else {
-        resolve('');
+    setSelectedProject(project);
+    setIsModalOpen(true);
+    document.body.style.overflow = 'hidden';
+    
+    // Preload the video for the modal
+    const video = document.createElement('video');
+    video.src = project.video;
+    video.preload = 'auto';
+  }, []);
+  
+  // Close modal and re-enable body scroll
+  const closeModal = useCallback(() => {
+    setIsModalOpen(false);
+    document.body.style.overflow = 'auto';
+    
+    // Pause any playing videos when modal closes
+    const videos = document.querySelectorAll('video');
+    videos.forEach(video => video.pause());
+  }, []);
+  
+  // Close modal when clicking outside or pressing Escape
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
+        closeModal();
       }
     };
-
-    video.onerror = () => {
-      resolve('');
-    };
-  });
-};
-
-const Portfolio: React.FC = () => {
-  const videoContainerRef = useRef<HTMLDivElement>(null);
-
-  const toggleFullscreen = useCallback(() => {
-    if (!videoContainerRef.current) return;
     
-    if (!document.fullscreenElement) {
-      videoContainerRef.current.requestFullscreen().catch(err => {
-        console.error('Error attempting to enable fullscreen:', err);
-      });
-    } else if (document.exitFullscreen) {
-      document.exitFullscreen();
-    }
-  }, []);
-  const [filter, setFilter] = useState<string>("all");
-  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
-  const [isVideoLoading, setIsVideoLoading] = useState(false);
-  const [videoPoster, setVideoPoster] = useState<string>('');
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const { ref } = useInView({ threshold: 0.1 });
-  const typedRef = ref as React.RefObject<HTMLDivElement>;
-  const videoPreloadCache = useRef<Record<string, boolean>>({});
-  const [filteredProjects, setFilteredProjects] = useState<Project[]>([]);
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        closeModal();
+      }
+    };
+    
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('keydown', handleEscape);
+    
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleEscape);
+    };
+  }, [closeModal]);
 
   // Filter projects based on the selected filter
-  useEffect(() => {
-    const filtered = filter === "all" 
-      ? [...projects] 
-      : projects.filter((project: Project) => project.category === filter);
-    setFilteredProjects(filtered);
-  }, [filter]);
-
-  // Handle video poster generation when a project is selected
-  useEffect(() => {
-    if (!selectedProject?.video) return;
-
-    const generatePoster = async () => {
-      try {
-        const poster = await getVideoPoster(selectedProject.video!);
-        setVideoPoster(poster);
-      } catch (error) {
-        console.error('Error generating video poster:', error);
-      }
-    };
-
-    generatePoster();
-  }, [selectedProject]);
-
-  const openVideo = useCallback((project: Project) => {
-    setSelectedProject(project);
-    setIsVideoLoading(true);
-    
-    // Start preloading the video in the background
-    if (project.video && !videoPreloadCache.current[project.video]) {
-      const video = document.createElement('video');
-      video.preload = 'auto';
-      video.src = project.video;
-      video.load();
-      videoPreloadCache.current[project.video] = true;
-    }
-  }, []);
-
-  const closeVideo = useCallback(() => {
-    if (videoRef.current) {
-      videoRef.current.pause();
-      videoRef.current.currentTime = 0;
-    }
-    setSelectedProject(null);
-    setVideoPoster('');
-  }, []);
+  const filteredProjects = filter === 'all' 
+    ? projects 
+    : projects.filter(project => project.category === filter);
+  
+  // Get unique categories for filter buttons
+  const categories = ['all', ...new Set(projects.map(project => project.category))];
+  
+  // Don't render anything on server-side
+  if (!isClient) {
+    return null;
+  }
 
   return (
-    <section id="portfolio" className="py-20 bg-white">
-      <div className="container mx-auto px-4 md:px-6">
-        <h2 className="text-3xl font-bold mb-4">Our Portfolio</h2>
-        <p className="text-lg text-gray-600 mb-8">Showcasing our finest interior design projects</p>
+    <section className="py-16 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto">
+        <h2 className="text-3xl font-bold text-center mb-12">Our Portfolio</h2>
         
-        <div className="flex justify-center mt-10 mb-12">
-          <button
-            onClick={() => setFilter("all")}
-            className={`px-6 py-2 mr-4 ${filter === "all" ? "bg-primary text-white" : "border border-primary text-primary hover:bg-primary hover:text-white"} transition-all duration-300 rounded`}
-          >
-            All
-          </button>
-          <button
-            onClick={() => setFilter("residential")}
-            className={`px-6 py-2 mr-4 ${filter === "residential" ? "bg-primary text-white" : "border border-primary text-primary hover:bg-primary hover:text-white"} transition-all duration-300 rounded`}
-          >
-            Residential
-          </button>
-          <button
-            onClick={() => setFilter("commercial")}
-            className={`px-6 py-2 ${filter === "commercial" ? "bg-primary text-white" : "border border-primary text-primary hover:bg-primary hover:text-white"} transition-all duration-300 rounded`}
-          >
-            Commercial
-          </button>
+        {/* Filter Buttons */}
+        <div className="flex flex-wrap justify-center gap-4 mb-12">
+          {categories.map((category) => (
+            <button
+              key={category}
+              onClick={() => setFilter(category)}
+              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                filter === category
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+              }`}
+            >
+              {category.charAt(0).toUpperCase() + category.slice(1)}
+            </button>
+          ))}
         </div>
-
-        <div 
-          ref={typedRef}
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-12"
-        >
+        
+        {/* Projects Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredProjects.map((project) => (
             <div 
-              key={project.id} 
-              className="group relative overflow-hidden rounded-lg cursor-pointer transform transition-transform duration-300 hover:scale-[1.02] hover:shadow-xl"
-              onClick={() => openVideo(project)}
+              key={project.id}
+              className={`group relative overflow-hidden rounded-lg shadow-lg cursor-pointer transition-transform hover:scale-105 ${
+                project.video ? 'cursor-pointer' : 'cursor-default'
+              }`}
+              onClick={() => project.video && handleProjectClick(project)}
             >
-              <div className="relative aspect-video">
-                <OptimizedImage 
-                  src={project.image} 
-                  alt={project.title} 
-                  className="w-full h-full"
+              <div className="aspect-w-16 aspect-h-9 bg-gray-100">
+                <img
+                  src={project.image}
+                  alt={project.title}
+                  className="w-full h-full object-cover"
+                  loading="lazy"
                 />
-                <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-70 transition-all duration-300 flex flex-col items-center justify-center p-4 text-center">
-                  <h3 className="text-white text-lg md:text-xl font-semibold mb-2">{project.title}</h3>
-                  <span className="text-accent text-sm px-3 py-1 bg-black bg-opacity-50 rounded-full">
-                    {project.category}
-                  </span>
-                  <div className="mt-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    <div className="w-16 h-16 rounded-full bg-white bg-opacity-20 flex items-center justify-center">
-                      <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M6.3 2.841A1.5 1.5 0 004 4.11v11.78a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z" />
+                {project.video && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-300">
+                    <div className="w-16 h-16 rounded-full bg-white bg-opacity-80 flex items-center justify-center transform group-hover:scale-110 transition-transform">
+                      <svg className="w-8 h-8 text-gray-900" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
                       </svg>
                     </div>
                   </div>
-                </div>
+                )}
+              </div>
+              <div className="p-4 bg-white dark:bg-gray-800">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                  {project.title}
+                </h3>
+                <p className="text-sm text-gray-500 dark:text-gray-400 capitalize">
+                  {project.category}
+                </p>
               </div>
             </div>
           ))}
         </div>
-
-        {selectedProject && selectedProject.video && (
-          <div 
-            className="fixed inset-0 bg-black bg-opacity-90 z-50 flex items-center justify-center p-4"
-            onClick={closeVideo}
-          >
+        
+        {/* Video Modal */}
+        {isModalOpen && selectedProject?.video && (
+          <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4">
             <div 
-              className="relative w-full max-w-6xl mx-auto bg-black rounded-lg overflow-hidden shadow-2xl"
-              onClick={e => e.stopPropagation()}
+              ref={modalRef}
+              className="relative w-full max-w-4xl bg-black rounded-lg overflow-hidden"
             >
-              <div 
-                ref={videoContainerRef}
-                className="relative w-full max-h-[80vh] flex items-center justify-center bg-black"
-              >
-                <div className={`relative ${selectedProject.id === 1 ? 'w-full' : 'w-full max-w-md mx-auto'} max-h-[90vh]`}>
-                  <div className={`relative ${selectedProject.id === 1 ? 'aspect-video' : 'aspect-[9/16]'} w-full h-full`}>
-                    <OptimizedVideo
-                      src={selectedProject.video}
-                      placeholderSrc={videoPoster}
-                      className="w-full h-full object-contain"
-                      autoPlay
-                      controls
-                      controlsList="nodownload"
-                      muted={false}
-                      loop
-                      onCanPlay={() => {
-                        setIsVideoLoading(false);
-                        // Ensure video is unmuted when it starts playing
-                        const video = document.querySelector('video');
-                        if (video) {
-                          video.muted = false;
-                        }
-                      }}
-                      onWaiting={() => setIsVideoLoading(true)}
-                    />
-                  </div>
-                </div>
-                <button
-                  onClick={toggleFullscreen}
-                  className="absolute top-4 right-4 p-2 bg-black bg-opacity-50 rounded-full text-white hover:bg-opacity-70 transition-opacity z-10"
-                  aria-label="Toggle fullscreen"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
-                  </svg>
-                </button>
-                {isVideoLoading && (
-                  <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-70">
-                    <div className="w-16 h-16 border-t-2 border-primary border-solid rounded-full animate-spin"></div>
-                  </div>
-                )}
-              </div>
-              <div className="p-4 bg-black bg-opacity-70">
-                <h3 className="text-white text-xl font-semibold mb-2">{selectedProject.title}</h3>
-                <p className="text-gray-300 text-sm">{selectedProject.category}</p>
-              </div>
-              <button
-                onClick={closeVideo}
-                className="absolute top-6 right-6 w-16 h-16 rounded-full bg-black bg-opacity-80 text-white hover:bg-opacity-100 transition-all duration-200 flex items-center justify-center shadow-lg hover:scale-110 transform"
+              <button 
+                onClick={closeModal}
+                className="absolute top-4 right-4 z-10 text-white hover:text-gray-300 transition-colors"
                 aria-label="Close video"
               >
-                <svg className="w-10 h-10" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
+              
+              <div className="aspect-video w-full">
+                <OptimizedVideo
+                  src={selectedProject.video}
+                  className="w-full h-full"
+                  autoPlay
+                  controls
+                  loop
+                  muted={false}
+                  priority="high"
+                />
+              </div>
+              
+              <div className="p-4 bg-black text-white">
+                <h3 className="text-xl font-semibold">{selectedProject.title}</h3>
+                <p className="text-gray-300 capitalize">{selectedProject.category}</p>
+              </div>
             </div>
           </div>
         )}
-        
-        <div className="text-center mt-12">
-          <button className="bg-primary text-white hover:bg-primary/90 py-3 px-8 transition-all duration-300 font-medium">
-            View All Projects
-          </button>
-        </div>
       </div>
     </section>
   );
