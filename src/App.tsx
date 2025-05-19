@@ -1,4 +1,4 @@
-import React, { Suspense, lazy } from 'react';
+import { Suspense, lazy } from 'react';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import { ScrollToTop } from './components/ScrollToTop';
@@ -13,7 +13,6 @@ const About = lazy(() => import('./components/About'));
 const Testimonials = lazy(() => import('./components/Testimonials'));
 const BlogSection = lazy(() => import('./components/BlogSection'));
 const Contact = lazy(() => import('./components/Contact'));
-const Chatbot = lazy(() => import('./components/Chatbot'));
 
 function App() {
   return (
@@ -33,9 +32,6 @@ function App() {
       </main>
       <Footer />
       <ScrollToTop />
-      <Suspense fallback={null}>
-        <Chatbot />
-      </Suspense>
     </div>
   );
 }
