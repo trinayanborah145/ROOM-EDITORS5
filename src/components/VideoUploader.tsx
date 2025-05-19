@@ -21,7 +21,6 @@ const VideoUploader: React.FC<VideoUploaderProps> = ({
   const [file, setFile] = useState<File | null>(null);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { uploadVideo, isUploading, progress, error, reset } = useVideoUpload();
@@ -40,11 +39,8 @@ const VideoUploader: React.FC<VideoUploaderProps> = ({
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
-    accept: accept.reduce((acc, type) => ({ ...acc, [type]: [] }), {}),
+    accept: accept.reduce((acc, type) => ({ ...acc, [type]: [] }), {} as { [key: string]: string[] }),
     multiple: false,
-    onDragEnter: () => setIsDragging(true),
-    onDragLeave: () => setIsDragging(false),
-    onDrop: () => setIsDragging(false),
   });
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
