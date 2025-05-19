@@ -1,5 +1,9 @@
-const fs = require('fs');
-const path = require('path');
+import { writeFileSync } from 'fs';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 // List of all your routes
 const routes = [
@@ -26,8 +30,8 @@ const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
     .join('')}
 </urlset>`;
 
-fs.writeFileSync(
-  path.join(__dirname, '../public/sitemap.xml'),
+writeFileSync(
+  join(__dirname, '../public/sitemap.xml'),
   sitemap
 );
 

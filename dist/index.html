@@ -1,21 +1,41 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title> ROOM EDITORS | Luxury Room Editors Design</title>
+    <title>ROOM EDITORS | Luxury Room Editors Design</title>
+    <meta name="description" content="Award-winning Room Editors design studio specializing in luxury residential and commercial spaces." />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <link rel="manifest" href="./manifest.json" />
     
-    <!-- Google Fonts -->
+    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600&family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
     
-    <meta name="description" content="Award-winning Room Editors design studio specializing in luxury residential and commercial spaces. Transform your space with our expert designers.">
-    <script type="module" crossorigin src="./assets/index-BcX8DZle.js"></script>
-    <link rel="stylesheet" crossorigin href="./assets/index-DGjWXWpU.css">
+    <!-- Styles -->
+    <script type="module" crossorigin src="./assets/index-x8PzWX-_.js"></script>
+    <link rel="modulepreload" crossorigin href="./assets/vendor-liIMdADX.js">
+    <link rel="modulepreload" crossorigin href="./assets/lucide-mHj9518F.js">
+    <link rel="stylesheet" crossorigin href="./assets/index-xTJuDZqk.css">
   </head>
   <body>
     <div id="root"></div>
+    <script>
+      // Register service worker
+      if ('serviceWorker' in navigator && window.location.protocol === 'https:') {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js')
+            .then(registration => {
+              console.log('ServiceWorker registration successful with scope: ', registration.scope);
+              // Check for updates every hour
+              setInterval(() => registration.update(), 60 * 60 * 1000);
+            })
+            .catch(error => {
+              console.error('ServiceWorker registration failed: ', error);
+            });
+        });
+      }
+    </script>
   </body>
 </html>
