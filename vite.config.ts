@@ -43,21 +43,22 @@ export default defineConfig(({ mode }) => ({
         'react-router-dom',
         'react-dropzone',
         'react-icons/fi',
+        'react-icons',
         'axios',
         '@tanstack/react-query',
       ],
       output: {
-        manualChunks: (id) => {
-          if (id.includes('node_modules')) {
-            if (id.includes('react-icons')) {
-              return 'vendor.icons';
-            }
-            if (id.includes('@tanstack')) {
-              return 'vendor.react-query';
-            }
-            return 'vendor';
-          }
-        },
+        manualChunks: {
+          vendor: [
+            'react',
+            'react-dom',
+            'react-router-dom',
+            'react-dropzone',
+            'axios'
+          ],
+          reactIcons: ['react-icons/fi', 'react-icons'],
+          reactQuery: ['@tanstack/react-query']
+        }
       },
     },
     chunkSizeWarningLimit: 1000, // in kbs
