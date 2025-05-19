@@ -1,4 +1,8 @@
-module.exports = {
+// @ts-check
+'use strict';
+
+/** @type {import('workbox-build').GenerateSWOptions} */
+const config = {
   globDirectory: 'dist/',
   globPatterns: [
     '**/*.{html,js,css,png,jpg,jpeg,svg,gif,ico,webp,woff,woff2,ttf,eot,json}'
@@ -51,3 +55,6 @@ module.exports = {
     }
   ]
 };
+
+// Export the configuration for Workbox
+module.exports = config;

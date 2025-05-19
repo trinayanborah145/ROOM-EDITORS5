@@ -10,6 +10,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build && node scripts/generate-sitemap.js && npm run optimize-assets && npm run generate-precache",
+    "postbuild": "workbox generateSW workbox-config.js",
     "build:analyze": "ANALYZE=true vite build",
     "preview": "vite preview --port 4173",
     "lint": "eslint . --ext .ts,.tsx",
