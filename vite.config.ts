@@ -37,16 +37,20 @@ export default defineConfig(({ mode }) => ({
     outDir: 'dist',
     emptyOutDir: true,
     rollupOptions: {
+      external: ['react-icons/fi'],
       output: {
         manualChunks: {
           vendor: ['react', 'react-dom', 'react-router-dom'],
           lucide: ['lucide-react'],
+          reactIcons: ['react-icons/fi'],
         },
       },
     },
     chunkSizeWarningLimit: 1000, // in kbs
     minify: 'terser',
     cssCodeSplit: true,
+    target: 'esnext',
+    sourcemap: mode !== 'production',
   },
   optimizeDeps: {
     include: ['react', 'react-dom'],
