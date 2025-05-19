@@ -1,9 +1,6 @@
 # Dependencies
 node_modules/
 
-# Backend directory
-backend/
-
 # Build output
 dist/
 
