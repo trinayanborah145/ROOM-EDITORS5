@@ -118,31 +118,31 @@ const VideoList: React.FC<VideoListProps> = ({ onVideoSelect, className = '' }) 
   }
 
   return (
-    <>
-      <div className={`grid gap-6 ${className}`}>
+    <div className={`space-y-6 ${className}`}>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {videos.map((video) => (
           <div
             key={video._id}
-            className="bg-white overflow-hidden shadow rounded-lg hover:shadow-md transition-shadow duration-200 cursor-pointer"
+            className="bg-white rounded-lg shadow-md overflow-hidden cursor-pointer hover:shadow-lg transition-shadow duration-300 flex flex-col h-full"
             onClick={() => handleVideoClick(video)}
           >
-            <div className="relative pb-[56.25%] bg-gray-100">
+            <div className="relative w-full bg-gray-100 overflow-hidden" style={{ paddingBottom: '56.25%' }}>
               {video.thumbnailUrl ? (
                 <img
                   src={video.thumbnailUrl}
                   alt={video.title}
-                  className="absolute h-full w-full object-cover"
+                  className="absolute inset-0 w-full h-full object-cover"
                 />
               ) : (
                 <div className="absolute inset-0 flex items-center justify-center bg-gray-200">
-                  <VideoIcon className="h-12 w-12 text-gray-400" />
+                  <VideoIcon className="w-12 h-12 text-gray-400" />
                 </div>
               )}
               <div className="absolute bottom-2 right-2 bg-black bg-opacity-70 text-white text-xs px-2 py-1 rounded">
                 {formatDuration(video.duration)}
               </div>
             </div>
-            <div className="p-4">
+            <div className="p-4 flex-1 flex flex-col">
               <h3 className="text-lg font-medium text-gray-900 line-clamp-2">
                 {video.title}
               </h3>
@@ -151,7 +151,7 @@ const VideoList: React.FC<VideoListProps> = ({ onVideoSelect, className = '' }) 
                   {video.description}
                 </p>
               )}
-              <div className="mt-3 flex items-center text-xs text-gray-500">
+              <div className="mt-3 flex items-center text-xs text-gray-500 mt-auto">
                 <div className="flex items-center">
                   <Eye className="h-3.5 w-3.5 mr-1" />
                   <span>{video.views} views</span>
@@ -171,9 +171,15 @@ const VideoList: React.FC<VideoListProps> = ({ onVideoSelect, className = '' }) 
       {selectedVideo && (
         <div className="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
           <div className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-            <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true" onClick={handleCloseModal}></div>
-            <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-            <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full">
+            <div 
+              className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" 
+              onClick={handleCloseModal}
+              aria-hidden="true"
+            ></div>
+            <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">
+              &#8203;
+            </span>
+            <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl w-full">
               <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                 <div className="sm:flex sm:items-start">
                   <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
@@ -187,18 +193,29 @@ const VideoList: React.FC<VideoListProps> = ({ onVideoSelect, className = '' }) 
                         onClick={handleCloseModal}
                       >
                         <span className="sr-only">Close</span>
-                        <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                        <svg 
+                          className="h-6 w-6" 
+                          fill="none" 
+                          viewBox="0 0 24 24" 
+                          stroke="currentColor"
+                          aria-hidden="true"
+                        >
+                          <path 
+                            strokeLinecap="round" 
+                            strokeLinejoin="round" 
+                            strokeWidth="2" 
+                            d="M6 18L18 6M6 6l12 12" 
+                          />
                         </svg>
                       </button>
                     </div>
                     <div className="mt-4">
-                      <div className="aspect-w-16 aspect-h-9 bg-black">
+                      <div className="w-full" style={{ paddingBottom: '56.25%', position: 'relative' }}>
                         <VideoPlayer
                           videoId={selectedVideo._id}
                           autoPlay
                           controls
-                          className="w-full h-full"
+                          className="absolute inset-0 w-full h-full"
                         />
                       </div>
                       {selectedVideo.description && (
@@ -233,7 +250,7 @@ const VideoList: React.FC<VideoListProps> = ({ onVideoSelect, className = '' }) 
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 };
 

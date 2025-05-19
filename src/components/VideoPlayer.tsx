@@ -70,7 +70,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
     onEnded?.();
   };
 
-  const handleError = (e: React.SyntheticEvent<HTMLVideoElement, Event>) => {
+  const handleError = () => {
     const error = new Error('Failed to load video');
     setError(error);
     onError?.(error);
@@ -96,7 +96,6 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
     );
   }
 
-
   if (isLoading) {
     return (
       <div className={`bg-gray-100 flex items-center justify-center ${className}`}>
@@ -106,24 +105,24 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
   }
 
   return (
-    <div className={`relative ${className}`}>
-      <video
-        ref={videoRef}
-        className="w-full h-full object-contain bg-black"
-        autoPlay={autoPlay}
-        controls={controls}
-        loop={loop}
-        muted={muted}
-        poster={poster}
-        onPlay={handlePlay}
-        onPause={handlePause}
-        onEnded={handleEnded}
-        onError={handleError}
-        onLoadedData={handleLoadedData}
-      >
-        <source src={videoUrl} type="video/mp4" />
-        Your browser does not support the video tag.
-      </video>
+    <div className={`relative w-full ${className}`}>
+      <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
+        <video
+          ref={videoRef}
+          src={videoUrl}
+          autoPlay={autoPlay}
+          controls={controls}
+          loop={loop}
+          muted={muted}
+          className="absolute inset-0 w-full h-full object-contain bg-black"
+          poster={poster}
+          onPlay={handlePlay}
+          onPause={handlePause}
+          onEnded={handleEnded}
+          onError={handleError}
+          onLoadedData={handleLoadedData}
+        />
+      </div>
     </div>
   );
 };
