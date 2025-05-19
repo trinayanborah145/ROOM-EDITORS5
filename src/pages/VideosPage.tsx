@@ -1,16 +1,14 @@
 import React, { useState } from 'react';
-import { PlusIcon, VideoCameraIcon } from '@heroicons/react/outline';
+import { PlusIcon, VideoCameraIcon } from '@heroicons/react/24/outline';
 import VideoList from '../components/VideoList';
 import VideoUploader from '../components/VideoUploader';
-import { useAuth } from '../contexts/AuthContext';
 
 const VideosPage: React.FC = () => {
   const [showUploader, setShowUploader] = useState(false);
-  const { isAuthenticated } = useAuth();
 
   const handleUploadSuccess = () => {
     setShowUploader(false);
-    // You might want to refresh the video list here
+    // Refresh the video list
     window.location.reload();
   };
 
@@ -23,16 +21,14 @@ const VideosPage: React.FC = () => {
             Browse and manage your video collection
           </p>
         </div>
-        {isAuthenticated && (
-          <button
-            type="button"
-            onClick={() => setShowUploader(true)}
-            className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-          >
-            <PlusIcon className="-ml-1 mr-2 h-5 w-5" aria-hidden="true" />
-            Upload Video
-          </button>
-        )}
+        <button
+          type="button"
+          onClick={() => setShowUploader(true)}
+          className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+        >
+          <PlusIcon className="-ml-1 mr-2 h-5 w-5" aria-hidden="true" />
+          Upload Video
+        </button>
       </div>
 
       {showUploader && (

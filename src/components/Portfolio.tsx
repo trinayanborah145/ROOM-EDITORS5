@@ -17,63 +17,63 @@ const projects: Project[] = [
     id: 1,
     title: "Minimalist Apartment in Guwahati",
     category: "residential",
-    image: "https://images.pexels.com/photos/1643383/pexels-photo-1643383.jpeg",
+    image: "/01-channel-flagship-interior-store-bangalore-1-720x395.jpg",
     video: "/videos/amar notun ghor.mp4"
   },
   {
     id: 2,
     title: "Full Interior House Design in Goalpara",
     category: "residential",
-    image: "https://images.pexels.com/photos/1457842/pexels-photo-1457842.jpeg",
+    image: "/01-channel-flagship-interior-store-bangalore-1-720x395.jpg",
     video: "/videos/RESIDENTIAL.mp4"
   },
   {
     id: 3,
     title: "Mobile Store Design in Pathsala",
     category: "commercial",
-    image: "01-channel-flagship-interior-store-bangalore-1-720x395.jpg",
+    image: "/01-channel-flagship-interior-store-bangalore-1-720x395.jpg",
     video: "/videos/pathshala.mp4"
   },
   {
     id: 4,
     title: "Corporate Office Space in Dibrugarh",
     category: "commercial",
-    image: "https://images.pexels.com/photos/3932930/pexels-photo-3932930.jpeg",
+    image: "/01-channel-flagship-interior-store-bangalore-1-720x395.jpg",
     video: "/videos/notunbb.mp4"
   },
   {
     id: 5,
     title: "Full Modular Kitchen in Golaghat",
     category: "residential2",
-    image: "https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg",
+    image: "/01-channel-flagship-interior-store-bangalore-1-720x395.jpg",
     video: "/videos/Modular Kitchen.mp4"
   },
   {
     id: 6,
     title: "School Cabin Design in Goalpara",
     category: "commercial",
-    image: "https://images.pexels.com/photos/1090638/pexels-photo-1090638.jpeg",
+    image: "/01-channel-flagship-interior-store-bangalore-1-720x395.jpg",
     video: "/videos/KINGKOR.mp4"
   },
   {
     id: 7,
     title: "Luxury GYM Design in Guwahati",
     category: "commercial",
-    image: "https://images.pexels.com/photos/380768/pexels-photo-380768.jpeg",
+    image: "/01-channel-flagship-interior-store-bangalore-1-720x395.jpg",
     video: "/videos/GYM.mp4"
   },
   {
     id: 8,
     title: "Super Mart Design in Bongaigaon",
     category: "commercial",
-    image: "https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg",
+    image: "/01-channel-flagship-interior-store-bangalore-1-720x395.jpg",
     video: "/videos/bongaigaon.mp4"
   },
   {
     id: 9,
     title: "Flat Interior Design in Six-Mile",
     category: "residential",
-    image: "https://images.pexels.com/photos/262047/pexels-photo-262047.jpeg",
+    image: "/01-channel-flagship-interior-store-bangalore-1-720x395.jpg",
     video: "/videos/dbre.mp4"
   }
 ];
@@ -265,16 +265,29 @@ const Portfolio: React.FC = () => {
                 ref={videoContainerRef}
                 className="relative w-full max-h-[80vh] flex items-center justify-center bg-black"
               >
-                <OptimizedVideo
-                  src={selectedProject.video}
-                  placeholderSrc={videoPoster}
-                  className="max-w-full max-h-[80vh]"
-                  autoPlay
-                  controls
-                  loop
-                  onCanPlay={() => setIsVideoLoading(false)}
-                  onWaiting={() => setIsVideoLoading(true)}
-                />
+                <div className={`relative ${selectedProject.id === 1 ? 'w-full' : 'w-full max-w-md mx-auto'} max-h-[90vh]`}>
+                  <div className={`relative ${selectedProject.id === 1 ? 'aspect-video' : 'aspect-[9/16]'} w-full h-full`}>
+                    <OptimizedVideo
+                      src={selectedProject.video}
+                      placeholderSrc={videoPoster}
+                      className="w-full h-full object-contain"
+                      autoPlay
+                      controls
+                      controlsList="nodownload"
+                      muted={false}
+                      loop
+                      onCanPlay={() => {
+                        setIsVideoLoading(false);
+                        // Ensure video is unmuted when it starts playing
+                        const video = document.querySelector('video');
+                        if (video) {
+                          video.muted = false;
+                        }
+                      }}
+                      onWaiting={() => setIsVideoLoading(true)}
+                    />
+                  </div>
+                </div>
                 <button
                   onClick={toggleFullscreen}
                   className="absolute top-4 right-4 p-2 bg-black bg-opacity-50 rounded-full text-white hover:bg-opacity-70 transition-opacity z-10"
