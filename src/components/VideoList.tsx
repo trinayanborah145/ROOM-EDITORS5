@@ -126,18 +126,21 @@ const VideoList: React.FC<VideoListProps> = ({ onVideoSelect, className = '' }) 
             className="bg-white rounded-lg shadow-md overflow-hidden cursor-pointer hover:shadow-lg transition-shadow duration-300 flex flex-col h-full"
             onClick={() => handleVideoClick(video)}
           >
-            <div className="relative w-full bg-gray-100 overflow-hidden" style={{ paddingBottom: '56.25%' }}>
-              {video.thumbnailUrl ? (
-                <img
-                  src={video.thumbnailUrl}
-                  alt={video.title}
-                  className="absolute inset-0 w-full h-full object-cover"
-                />
-              ) : (
-                <div className="absolute inset-0 flex items-center justify-center bg-gray-200">
-                  <VideoIcon className="w-12 h-12 text-gray-400" />
-                </div>
-              )}
+            <div className="relative w-full bg-gray-100 overflow-hidden">
+              <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
+                {video.thumbnailUrl ? (
+                  <img
+                    src={video.thumbnailUrl}
+                    alt={video.title}
+                    className="absolute inset-0 w-full h-full object-contain bg-black"
+                    style={{ aspectRatio: 'auto' }}
+                  />
+                ) : (
+                  <div className="absolute inset-0 flex items-center justify-center bg-gray-200">
+                    <VideoIcon className="w-12 h-12 text-gray-400" />
+                  </div>
+                )}
+              </div>
               <div className="absolute bottom-2 right-2 bg-black bg-opacity-70 text-white text-xs px-2 py-1 rounded">
                 {formatDuration(video.duration)}
               </div>

@@ -106,7 +106,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
 
   return (
     <div className={`relative w-full ${className}`}>
-      <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
+      <div className="relative w-full flex items-center justify-center bg-black">
         <video
           ref={videoRef}
           src={videoUrl}
@@ -114,13 +114,14 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
           controls={controls}
           loop={loop}
           muted={muted}
-          className="absolute inset-0 w-full h-full object-contain bg-black"
+          className="w-full max-h-[80vh] object-contain"
           poster={poster}
           onPlay={handlePlay}
           onPause={handlePause}
           onEnded={handleEnded}
           onError={handleError}
           onLoadedData={handleLoadedData}
+          style={{ aspectRatio: 'auto' }}
         />
       </div>
     </div>
