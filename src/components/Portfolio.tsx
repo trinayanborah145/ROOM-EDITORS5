@@ -121,6 +121,19 @@ const getVideoPoster = (videoUrl: string): Promise<string> => {
 };
 
 const Portfolio: React.FC = () => {
+  const videoContainerRef = useRef<HTMLDivElement>(null);
+
+  const toggleFullscreen = useCallback(() => {
+    if (!videoContainerRef.current) return;
+    
+    if (!document.fullscreenElement) {
+      videoContainerRef.current.requestFullscreen().catch(err => {
+        console.error('Error attempting to enable fullscreen:', err);
+      });
+    } else if (document.exitFullscreen) {
+      document.exitFullscreen();
+    }
+  }, []);
   const [filter, setFilter] = useState<string>("all");
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [isVideoLoading, setIsVideoLoading] = useState(false);
@@ -248,20 +261,29 @@ const Portfolio: React.FC = () => {
               className="relative w-full max-w-6xl mx-auto bg-black rounded-lg overflow-hidden shadow-2xl"
               onClick={e => e.stopPropagation()}
             >
-              <div className="relative pt-[56.25%] w-full">
-                <div className="absolute inset-0 w-full h-full">
-                  <OptimizedVideo
-                    src={selectedProject.video}
-                    placeholderSrc={videoPoster}
-                    className="w-full h-full object-contain"
-                    autoPlay
-                    controls
-                    loop
-                    onVideoClick={closeVideo}
-                    onCanPlay={() => setIsVideoLoading(false)}
-                    onWaiting={() => setIsVideoLoading(true)}
-                  />
-                </div>
+              <div 
+                ref={videoContainerRef}
+                className="relative w-full max-h-[80vh] flex items-center justify-center bg-black"
+              >
+                <OptimizedVideo
+                  src={selectedProject.video}
+                  placeholderSrc={videoPoster}
+                  className="max-w-full max-h-[80vh]"
+                  autoPlay
+                  controls
+                  loop
+                  onCanPlay={() => setIsVideoLoading(false)}
+                  onWaiting={() => setIsVideoLoading(true)}
+                />
+                <button
+                  onClick={toggleFullscreen}
+                  className="absolute top-4 right-4 p-2 bg-black bg-opacity-50 rounded-full text-white hover:bg-opacity-70 transition-opacity z-10"
+                  aria-label="Toggle fullscreen"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
+                  </svg>
+                </button>
                 {isVideoLoading && (
                   <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-70">
                     <div className="w-16 h-16 border-t-2 border-primary border-solid rounded-full animate-spin"></div>

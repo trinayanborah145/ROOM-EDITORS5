@@ -1,6 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 
-interface OptimizedVideoProps extends React.VideoHTMLAttributes<HTMLVideoElement> {
+// Simple classNames helper function
+const classNames = (...classes: (string | boolean | undefined)[]): string => {
+  return classes.filter(Boolean).join(' ');
+};
+
+interface OptimizedVideoProps extends Omit<React.VideoHTMLAttributes<HTMLVideoElement>, 'onClick'> {
   src: string;
   placeholderSrc?: string;
   className?: string;
@@ -9,7 +14,7 @@ interface OptimizedVideoProps extends React.VideoHTMLAttributes<HTMLVideoElement
   muted?: boolean;
   loop?: boolean;
   controls?: boolean;
-  onVideoClick?: () => void;
+  onVideoClick?: (e: React.MouseEvent<HTMLVideoElement>) => void;
 }
 
 const OptimizedVideo: React.FC<OptimizedVideoProps> = ({
@@ -26,10 +31,39 @@ const OptimizedVideo: React.FC<OptimizedVideoProps> = ({
 }) => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [isInView, setIsInView] = useState(false);
-  const [isPlaying, setIsPlaying] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
-  const observerRef = useRef<IntersectionObserver>();
   const containerRef = useRef<HTMLDivElement>(null);
+  const observerRef = useRef<IntersectionObserver>();
+
+  const handleCanPlay = () => {
+    setIsLoaded(true);
+  };
+
+  const handleError = () => {
+    console.error('Error loading video:', src);
+    setIsLoaded(true);
+  };
+
+  // Handle click on the video
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    const handleVideoClick = (e: MouseEvent) => {
+      if (onVideoClick) {
+        onVideoClick(e as unknown as React.MouseEvent<HTMLVideoElement>);
+      } else if (video.paused) {
+        video.play().catch(console.error);
+      } else {
+        video.pause();
+      }
+    };
+
+    video.addEventListener('click', handleVideoClick);
+    return () => {
+      video.removeEventListener('click', handleVideoClick);
+    };
+  }, [onVideoClick]);
 
   // Handle intersection observer for lazy loading
   useEffect(() => {
@@ -94,18 +128,19 @@ const OptimizedVideo: React.FC<OptimizedVideoProps> = ({
     };
   }, [isInView, src, autoPlay]);
 
-  const handleClick = () => {
+  const handleVideoClick = (e: React.MouseEvent<HTMLVideoElement>) => {
+    e.stopPropagation();
     if (onVideoClick) {
-      onVideoClick();
-    } else if (videoRef.current) {
-      if (isPlaying) {
-        videoRef.current.pause();
+      onVideoClick(e);
+      return;
+    }
+    
+    if (videoRef.current && isLoaded) {
+      if (videoRef.current.paused) {
+        videoRef.current.play().catch(console.error);
       } else {
-        videoRef.current.play().catch(error => {
-          console.error('Error playing video:', error);
-        });
+        videoRef.current.pause();
       }
-      setIsPlaying(!isPlaying);
     }
   };
 
@@ -113,22 +148,28 @@ const OptimizedVideo: React.FC<OptimizedVideoProps> = ({
     <div 
       ref={containerRef} 
       className={`relative overflow-hidden ${className}`}
-      onClick={handleClick}
     >
       {isInView ? (
         <>
-          <video
-            ref={videoRef}
-            className={`w-full h-full object-cover transition-opacity duration-300 ${
-              isLoaded ? 'opacity-100' : 'opacity-0'
-            }`}
-            preload={preload}
-            playsInline
-            muted={muted}
-            loop={loop}
-            controls={controls}
-            {...props}
-          />
+          <div className="relative w-full h-full">
+            <video
+              ref={videoRef}
+              className={classNames(
+                'w-full h-full object-contain transition-opacity duration-300',
+                isLoaded ? 'opacity-100' : 'opacity-0',
+                (onVideoClick || !controls) && 'cursor-pointer'
+              )}
+              preload={preload}
+              playsInline
+              muted={muted}
+              loop={loop}
+              controls={controls}
+              onCanPlay={handleCanPlay}
+              onError={handleError}
+              onClick={handleVideoClick}
+              {...props}
+            />
+          </div>
           {!isLoaded && (
             <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
               <div className="w-12 h-12 border-t-2 border-primary border-solid rounded-full animate-spin"></div>
